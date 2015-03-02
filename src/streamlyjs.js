@@ -11,11 +11,11 @@
     }
     else if(typeof exports === 'object') {
         // CommonJS style that does not support module.exports
-        exports['streamlyjs'] = factory();
+        exports['Streamly'] = factory();
     }
     else {
         // Global
-        root['streamlyjs'] = factory();
+        root['Streamly'] = factory();
     }
 }(this, function () {
     "use strict";
@@ -31,7 +31,7 @@
     Streamly.EventStream = function EventStream(initialValue) {
       this.isProperty = false;
       this.isActivated = false;
-      this.value = initialValue;
+      this.value = initialValue || null;
       this.listeners = [];
       this.activation_listeners = [];
     };
@@ -140,7 +140,7 @@
       Streamly.$ = {};
       Streamly.$.asEventStream = function asEventStream(eventName) {
         return Streamly.asEventStream(this, eventName);
-      }
+      };
       jQuery.fn.asEventStream = Streamly.$.asEventStream;
     }
     Streamly.timed = function timed(milliseconds, callback) {
