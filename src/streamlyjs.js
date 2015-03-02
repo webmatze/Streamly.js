@@ -20,6 +20,8 @@
 }(this, function () {
     "use strict";
 
+    var jQuery = window.jQuery;
+
     var Streamly = {
       toString: function toString() {
         return "Streamly.js by Mathias Karstädt";
@@ -134,7 +136,13 @@
       });
       return stream;
     };
-
+    if (jQuery) {
+      Streamly.$ = {};
+      Streamly.$.asEventStream = function asEventStream(eventName) {
+        return Streamly.asEventStream(this, eventName);
+      }
+      jQuery.fn.asEventStream = Streamly.$.asEventStream;
+    }
     Streamly.timed = function timed(milliseconds, callback) {
       var callLater = function() {
         callback();
