@@ -61,7 +61,7 @@
     };
 
     Streamly.EventStream.prototype.activate = function activate() {
-      _this = this;
+      var _this = this;
       if (!this.isActivated) {
         this.activation_listeners.forEach(function(listener) {
           listener(_this);
