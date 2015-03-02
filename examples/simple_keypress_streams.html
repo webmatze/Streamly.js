@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+<meta name="description" content="Simple Keypress Streams Example for Streamly.js">
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <meta charset="utf-8">
+  <title>JS Bin</title>
+  <script src="../src/streamlyjs.js"></script>
+  <script src="helper.js"></script>
+</head>
+<body>
+  <div id="keyState"></div>
+  <div id="arrowKeyState"></div>
+  <script>
+  var Streamly = window.streamlyjs;
+
+  // I tried to implement everything needed to run this example from here:
+  // http://raimohanska.github.io/bacon.js-slides/1.html
+  var allKeyUps = Streamly.asEventStream($('body'), 'keyup');
+  var allKeyDowns = Streamly.asEventStream($('body'), 'keydown');
+
+  var keyCodeIs = function(code) { return function(value) { return value.keyCode == code; }; };
+  var keyUps = function(code) { return allKeyUps.filter(keyCodeIs(code)); };
+  var keyDowns = function(code) { return allKeyDowns.filter(keyCodeIs(code)); };
+
+  function keyState(code) {
+    return keyDowns(code).map(always("down")).merge(keyUps(code).map(always("up"))).toProperty("up");
+  }
+  keyState(32).onValue(output('#keyState', 'Space Key='));
+
+  // Next example from here: http://raimohanska.github.io/bacon.js-slides/2.html
+  // caveat: one can only press two arrow keys at the same time on normal keyboards
+  function keyStateValue(keyCode, value) {
+    return keyDowns(keyCode).map(always([value])).merge(keyUps(keyCode).map(always([]))).toProperty([]);
+  }
+  var keysState = keyStateValue(38, 'UP')
+      .combine(keyStateValue(40, 'DOWN'), concat)
+      .combine(keyStateValue(37, 'LEFT'), concat)
+      .combine(keyStateValue(39, 'RIGHT'), concat).toProperty([]);
+
+  keysState.map(join(',')).onValue(output('#arrowKeyState','Arrow Keys='));
+  </script>
+</body>
+</html>
