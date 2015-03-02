@@ -30,6 +30,12 @@ var join = function join(joinBy) {
     return values.join(joinBy);
   };
 };
+var appendTo = function appendTo(elementId) {
+  var element = $(elementId);
+  return function(value) {
+    element.append(value);
+  }
+};
 var output = function output(elementId, preText) {
   var element = $(elementId);
   return function(value) {

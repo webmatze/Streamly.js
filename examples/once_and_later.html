@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+<meta name="description" content="Once and Later Example for Streamly.js">
+  <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <meta charset="utf-8">
+  <title>JS Bin</title>
+  <script src="../src/streamlyjs.js"></script>
+  <script src="helper.js"></script>
+</head>
+<body>
+  <div id="output"></div>
+  <script>
+  var Streamly = window.streamlyjs;
+
+  // Testing Streamly.once and Streamly.later
+  var alertOnce = Streamly.once('Hello ');
+  var alertLater = Streamly.later(3000, 'World!!!');
+  onceAndLater = alertOnce.merge(alertLater).onValue(appendTo('#output'));
+
+  </script>
+</body>
+</html>
