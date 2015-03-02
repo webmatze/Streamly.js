@@ -1,0 +1,20 @@
+{
+  "name": "streamlyjs",
+  "version": "0.0.0",
+  "author": "Mathias Karstädt",
+  "main": "dist/streamlyjs.js",
+  "license": "MIT",
+  "ignore": [
+      "**/.*",
+      "src",
+      "test",
+      "node_modules",
+      "bower_components",
+      "Gruntfile.js",
+      "package.json",
+      "bower.json",
+      ".travis.yml",
+      ".gitignore"
+  ]
+}
+

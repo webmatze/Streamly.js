@@ -1,0 +1,9 @@
+{
+    "sub": true,
+
+    "globals": {
+        "module": false,
+        "require": false,
+        "define": false
+    }
+}
