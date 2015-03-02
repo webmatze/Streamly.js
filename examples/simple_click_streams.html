@@ -21,8 +21,9 @@
   var buttonIdStream = clickStream.map(targetId);
 
   var countButton = buttonIdStream.filter(equals('count'));
-  var countStream = countButton.map(always(1)).scan(0, add).toProperty(0);
-  countStream.onValue(output('#counter', 'Counter='));
+  var countStream = countButton.map(always(1)).scan(0, add);
+  var counter = countStream.toProperty(0);
+  counter.onValue(output('#counter', 'Counter='));
   var resetButton = buttonIdStream.filter(equals('reset'));
   resetButton.onValue(function() {
     countStream.emit(0);
