@@ -73,37 +73,50 @@
     };
 
     Streamly.EventStream.prototype.filter = function filter(filterCallback) {
+      var _this = this;
       var filteredStream = new Streamly.EventStream();
       filteredStream.isProperty = this.isProperty;
-      this.onValue(function(data) {
-        if (filterCallback(data)) {
-          filteredStream.emit(data);
-        }
+      filteredStream.onActivation(function(theStream) {
+        _this.onValue(function(data) {
+          if (filterCallback(data)) {
+            filteredStream.emit(data);
+          }
+        });
       });
       return filteredStream;
     };
 
     Streamly.EventStream.prototype.map = function map(mapCallback) {
+      var _this = this;
       var mappedStream = new Streamly.EventStream();
       mappedStream.isProperty = this.isProperty;
-      this.onValue(function(data) {
-        mappedStream.emit(mapCallback(data));
+      mappedStream.onActivation(function(theStream) {
+        _this.onValue(function(data) {
+          mappedStream.emit(mapCallback(data));
+        });
       });
       return mappedStream;
     };
 
     Streamly.EventStream.prototype.merge = function merge(otherStream) {
+      var _this = this;
       var mergedStream = new Streamly.EventStream();
       mergedStream.isProperty = this.isProperty || otherStream.isProperty;
-      this.onValue(mergedStream.emit.bind(mergedStream));
-      otherStream.onValue(mergedStream.emit.bind(mergedStream));
+      mergedStream.onActivation(function(theStream) {
+        _this.onValue(mergedStream.emit.bind(mergedStream));
+        otherStream.onValue(mergedStream.emit.bind(mergedStream));
+      });
       return mergedStream;
     };
 
     Streamly.EventStream.prototype.toProperty = function toProperty(initialValue) {
+      var _this = this;
       var propertyStream = new Streamly.EventStream(initialValue);
       propertyStream.isProperty = true;
-      this.onValue(propertyStream.emit.bind(propertyStream));
+      propertyStream.onActivation(function(theStream) {
+        _this.onValue(propertyStream.emit.bind(propertyStream));
+      });
+      propertyStream.emit(initialValue);
       return propertyStream;
     };
 
@@ -121,10 +134,13 @@
     };
 
     Streamly.EventStream.prototype.scan = function scan(inital, scanFunction) {
+      var _this = this;
       var scanStream = new Streamly.EventStream(inital);
       scanStream.isProperty = this.isProperty;
-      this.onValue(function(value) {
-        scanStream.emit(scanFunction(scanStream.value, value));
+      scanStream.onActivation(function(theStream) {
+        _this.onValue(function(value) {
+          scanStream.emit(scanFunction(scanStream.value, value));
+        });
       });
       return scanStream;
     };
@@ -154,7 +170,7 @@
     Streamly.once = function once(value) {
       var stream = new Streamly.EventStream();
       stream.onActivation(function(theStream) {
-        Streamly.timed(0, function() {theStream.emit(value);});
+        theStream.emit(value);
       });
       return stream;
     };

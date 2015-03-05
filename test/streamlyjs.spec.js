@@ -33,4 +33,15 @@ describe("streamlyjs", function() {
       });
 
     });
+
+    describe('Streamly.once', function() {
+      it("should send single event", function() {
+        var stream = Streamly.once(1);
+        var values = [];
+        stream.onValue(function(value){ values.push(value); });
+        expect(values).toEqual([1]);
+        stream.onValue(function(value){ values.push(value); });
+        expect(values).toEqual([1]);
+      });
+    });
 });
