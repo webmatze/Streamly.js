@@ -114,9 +114,9 @@
       var propertyStream = new Streamly.EventStream(initialValue);
       propertyStream.isProperty = true;
       propertyStream.onActivation(function(theStream) {
-        _this.onValue(propertyStream.emit.bind(propertyStream));
+        theStream.emit(initialValue);
+        _this.onValue(theStream.emit.bind(theStream));
       });
-      propertyStream.emit(initialValue);
       return propertyStream;
     };
 
