@@ -134,6 +134,13 @@
       return propertyStream;
     };
 
+    Streamly.EventStream.prototype.startWith = function startWith(initialValue) {
+      this.onActivation(function(theStream) {
+        theStream.emit(initialValue);
+      });
+      return this;
+    };
+
     Streamly.EventStream.prototype.combine = function combine(stream, combineFunction) {
       var _this = this;
       var combinedStream = new Streamly.EventStream();
@@ -178,9 +185,8 @@
       var stream = new Streamly.EventStream();
       var success = function(value) { stream.emit(value); };
       var error = function(value) { stream.emit(value); };
-      var progress = function(value) { stream.emit(value); };
       stream.onActivation(function(theStream) {
-        promise.then(success, error, progress);
+        promise.then(success, error);
       });
       return stream;
     };
