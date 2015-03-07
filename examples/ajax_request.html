@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+  <meta name="description" content="Simple AJAX Request Example for Streamly.js">
+  <meta charset="utf-8">
+  <title>Simple AJAX Request Example</title>
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../src/streamlyjs.js"></script>
+  <script src="helper.js"></script>
+</head>
+<body>
+  <h1>Github Usernames</h1>
+  <p>Displays all the Github Users</p>
+  <ul id="users"></ul>
+  <script>
+  var Streamly = window.Streamly;
+
+  //using an example from https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
+  var requestStream = Streamly.once("https://api.github.com/users");
+  var responseMetaStream = requestStream.flatMap(function(requestUrl) {
+    return Streamly.fromPromise(jQuery.getJSON(requestUrl));
+  });
+  responseMetaStream.onValue(function(users) {
+    var cont = $("#users");
+    users.forEach(function(user) {
+      cont.append($("<li>").html(user.login));
+    })
+  });
+  </script>
+</body>
+</html>
