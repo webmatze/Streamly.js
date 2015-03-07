@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+  <meta name="description" content="Simple Login Form Example for Streamly.js">
+  <meta charset="utf-8">
+  <title>Simple Login Form Example</title>
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../src/streamlyjs.js"></script>
+  <script src="helper.js"></script>
+</head>
+<body>
+  <h1>Login Form</h1>
+  <p>The Login button should only be active if both fields are not empty.</p>
+  <form id="login_form">
+    <div>
+      <input type="email" name="email" placeholder="enter your email" /><span id="email-error"></span>
+    </div>
+    <div>
+      <input type="password" name="password" placeholder="your password" /><span id="password-error"></span>
+    </div>
+    <input type="submit" value="Login" />
+  </form>
+  <script>
+  var Streamly = window.Streamly;
+
+  function isFieldEmpty(e) { return !e.target.value; }
+  var email = $("#login_form input[type=email]").asEventStream('blur').map(isFieldEmpty);
+  var password = $("#login_form input[type=password]").asEventStream('blur').map(isFieldEmpty);
+
+  function errorMessage(message) {
+    return function(value) {
+      return value ? message : '';
+    }
+  }
+  function insert(elementSelector) {
+    var element = $(elementSelector);
+    return function(value) {
+      element.html(value);
+    }
+  }
+  email.map(errorMessage('Please enter email address.')).onValue(insert("#email-error"));
+  password.map(errorMessage('Please enter password.')).onValue(insert("#password-error"));
+
+  var button = $('#login_form input[type=submit]');
+  function checkIfBothEmpty(noEmail, noPass) { return noEmail || noPass; }
+  var bothFieldsEmtpyStream = Streamly.combineWith(checkIfBothEmpty, email, password).toProperty(true);
+  bothFieldsEmtpyStream.onValue(function(value) {
+    button.attr('disabled', value);
+  });
+  </script>
+</body>
+</html>
