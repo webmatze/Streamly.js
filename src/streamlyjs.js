@@ -126,11 +126,13 @@
     Streamly.EventStream.prototype.combine = function combine(stream, combineFunction) {
       var _this = this;
       var combinedStream = new Streamly.EventStream();
-      this.onValue(function(value) {
-        combinedStream.emit(combineFunction(stream.value, value));
-      });
-      stream.onValue(function(value) {
-        combinedStream.emit(combineFunction(_this.value, value));
+      combinedStream.onActivation(function(theStream) {
+        _this.onValue(function(value) {
+          theStream.emit(combineFunction(stream.value, value));
+        });
+        stream.onValue(function(value) {
+          theStream.emit(combineFunction(_this.value, value));
+        });
       });
       return combinedStream;
     };
