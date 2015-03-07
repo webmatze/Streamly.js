@@ -26,7 +26,7 @@
   counter.onValue(output('#counter', 'Counter='));
   var resetButton = buttonIdStream.filter(equals('reset'));
   resetButton.onValue(function() {
-    countStream.emit(0);
+    counter.emit(0);
   });
   </script>
 </body>
