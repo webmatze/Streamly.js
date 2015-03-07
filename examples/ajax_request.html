@@ -10,19 +10,30 @@
   <script src="helper.js"></script>
 </head>
 <body>
-  <h1>Github Usernames</h1>
-  <p>Displays all the Github Users</p>
+  <h1>Github User Recommendations</h1>
+  <p>Displays three random Github Users</p>
+  <button id="refresh">Refresh</button>
   <ul id="users"></ul>
   <script>
   var Streamly = window.Streamly;
 
   //using an example from https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
-  var requestStream = Streamly.once("https://api.github.com/users");
-  var responseMetaStream = requestStream.flatMap(function(requestUrl) {
+  var refreshStream = $("#refresh").asEventStream('click').startWith('click').map(function() {
+    var randomOffset = Math.floor(Math.random()*500);
+    return 'https://api.github.com/users?since=' + randomOffset;
+  });
+  var responseMetaStream = refreshStream.flatMap(function(requestUrl) {
     return Streamly.fromPromise(jQuery.getJSON(requestUrl));
   });
-  responseMetaStream.onValue(function(users) {
+  responseMetaStream.map(function(users) {
+    var threeUsers = [];
+    for(var i = 0; i < 3; i++) {
+      threeUsers.push(users[Math.floor(Math.random()*users.length)])
+    }
+    return threeUsers;
+  }).onValue(function(users) {
     var cont = $("#users");
+    cont.html("");
     users.forEach(function(user) {
       cont.append($("<li>").html(user.login));
     })
