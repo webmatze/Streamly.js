@@ -22,9 +22,6 @@ describe("streamlyjs", function() {
         stream.onValue(listener);
         expect(stream.listeners.length).toBe(1);
       });
-      it("should not be a property", function() {
-        expect(stream.isProperty).toBe(false);
-      });
       it("should not have a value", function() {
         expect(stream.value).toBeNull();
       });

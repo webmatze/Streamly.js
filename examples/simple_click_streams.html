@@ -21,12 +21,11 @@
   var buttonIdStream = clickStream.map(targetId);
 
   var countButton = buttonIdStream.filter(equals('count'));
-  var countStream = countButton.map(always(1)).scan(0, add);
-  var counter = countStream.toProperty(0);
-  counter.onValue(output('#counter', 'Counter='));
+  var countStream = countButton.map(always(1)).scan(0, add).startWith(0);
+  countStream.onValue(output('#counter', 'Counter='));
   var resetButton = buttonIdStream.filter(equals('reset'));
   resetButton.onValue(function() {
-    counter.emit(0);
+    countStream.emit(0);
   });
   </script>
 </body>

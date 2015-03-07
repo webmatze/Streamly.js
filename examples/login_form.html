@@ -44,7 +44,7 @@
 
   var button = $('#login_form input[type=submit]');
   function checkIfBothEmpty(noEmail, noPass) { return noEmail || noPass; }
-  var bothFieldsEmtpyStream = Streamly.combineWith(checkIfBothEmpty, email, password).toProperty(true);
+  var bothFieldsEmtpyStream = Streamly.combineWith(checkIfBothEmpty, email, password).startWith(true);
   bothFieldsEmtpyStream.onValue(function(value) {
     button.attr('disabled', value);
   });

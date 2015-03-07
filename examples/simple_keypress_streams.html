@@ -25,19 +25,19 @@
   var keyDowns = function(code) { return allKeyDowns.filter(keyCodeIs(code)); };
 
   function keyState(code) {
-    return keyDowns(code).map(always("down")).merge(keyUps(code).map(always("up"))).toProperty("up");
+    return keyDowns(code).map(always("down")).merge(keyUps(code).map(always("up"))).startWith("up");
   }
   keyState(32).onValue(output('#keyState', 'Space Key='));
 
   // Next example from here: http://raimohanska.github.io/bacon.js-slides/2.html
   // caveat: one can only press two arrow keys at the same time on normal keyboards
   function keyStateValue(keyCode, value) {
-    return keyDowns(keyCode).map(always([value])).merge(keyUps(keyCode).map(always([]))).toProperty([]);
+    return keyDowns(keyCode).map(always([value])).merge(keyUps(keyCode).map(always([]))).startWith([]);
   }
   var keysState = keyStateValue(38, 'UP')
       .combine(keyStateValue(40, 'DOWN'), concat)
       .combine(keyStateValue(37, 'LEFT'), concat)
-      .combine(keyStateValue(39, 'RIGHT'), concat).toProperty([]);
+      .combine(keyStateValue(39, 'RIGHT'), concat).startWith([]);
 
   keysState.map(join(',')).onValue(output('#arrowKeyState','Arrow Keys='));
   </script>
