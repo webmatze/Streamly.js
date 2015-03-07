@@ -44,4 +44,16 @@ describe("streamlyjs", function() {
         expect(values).toEqual([1]);
       });
     });
+
+    describe('Streamly.combineWith', function() {
+      it("should combine both streams to one using a callback function", function() {
+        var stream_a = Streamly.once(1);
+        var stream_b = Streamly.once(2);
+        function add (a, b) { return a + b; }
+        var combinedStream = Streamly.combineWith(add, stream_a, stream_b);
+        var returnValue = null;
+        combinedStream.onValue(function(value){ returnValue = value; });
+        expect(returnValue).toEqual(3);
+      });
+    });
 });

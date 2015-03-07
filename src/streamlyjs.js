@@ -183,5 +183,18 @@
       return stream;
     };
 
+    Streamly.combineWith = function combineWith(combineCallback, stream_a, stream_b) {
+      var combineWithStream = new Streamly.EventStream();
+      combineWithStream.onActivation(function(theStream) {
+        stream_a.onValue(function(value) {
+          theStream.emit(combineCallback(value, stream_b.value));
+        });
+        stream_b.onValue(function(value) {
+          theStream.emit(combineCallback(stream_a.value, value));
+        });
+      });
+      return combineWithStream;
+    };
+
     return Streamly;
 }));
