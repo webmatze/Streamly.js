@@ -32,6 +32,19 @@ describe("streamlyjs", function() {
         expect(stream.isActivated).toBe(false);
       });
 
+      describe('stream.flatMap', function() {
+        it("should flattedn a stream of streams", function() {
+          var flatStream = Streamly.once(1).flatMap(function(value) {
+            return Streamly.once("Hello World");
+          });
+          var values = [];
+          flatStream.onValue(function(value) {
+            values.push(value);
+          });
+          expect(values).toEqual(["Hello World"]);
+        });
+      });
+
     });
 
     describe('Streamly.once', function() {

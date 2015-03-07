@@ -98,6 +98,20 @@
       return mappedStream;
     };
 
+    Streamly.EventStream.prototype.flatMap = function flatMap(callback) {
+      var _this = this;
+      var mappedStream = new Streamly.EventStream();
+      mappedStream.isProperty = this.isProperty;
+      mappedStream.onActivation(function(theStream){
+        _this.onValue(function(value) {
+          callback(value).onValue(function(data) {
+            theStream.emit(data);
+          });
+        });
+      });
+      return mappedStream;
+    };
+
     Streamly.EventStream.prototype.merge = function merge(otherStream) {
       var _this = this;
       var mergedStream = new Streamly.EventStream();
@@ -159,6 +173,18 @@
       };
       jQuery.fn.asEventStream = Streamly.$.asEventStream;
     }
+
+    Streamly.fromPromise = function fromPromise(promise) {
+      var stream = new Streamly.EventStream();
+      var success = function(value) { stream.emit(value); };
+      var error = function(value) { stream.emit(value); };
+      var progress = function(value) { stream.emit(value); };
+      stream.onActivation(function(theStream) {
+        promise.then(success, error, progress);
+      });
+      return stream;
+    };
+
     Streamly.timed = function timed(milliseconds, callback) {
       var callLater = function() {
         callback();
