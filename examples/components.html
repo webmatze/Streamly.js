@@ -81,73 +81,80 @@
     var newTaskText = null;
     var keyStream = element.asEventStream('keyup');
     var clickStream = element.asEventStream('click');
-    var actions = {
-      render: function(tasks) {
-        element.html("");
-        taskStore.all().forEach(actions.renderTask);
-        actions.renderInput();
-      },
-      renderTask: function(task) {
-        element.append(
-          $("<div>",{
-              class: "task " + (task.done ? "done" : ""),
-              id: "task_" + task.id
-            }).append([
-              $("<input>",{
-                type: "checkbox",
-                checked: task.done
-              }),
-              task.title,
-              "&nbsp;",
-              $("<a>",{
-                href: "javascript:void(0)",
-                title: "delete Task"
-              }).append("x")
-            ])
-        );
-      },
-      renderInput: function() {
-        element.append($("<input>",{
-          type: "text",
-          placeholder: "add a new task"
-        }));
-      },
-      addTask: function() {
-        if (newTaskText) {
-          taskStore.add(newTaskText);
-          newTaskText = null;
-        }
-      },
-      deleteTask: function(task_id) {
-        taskStore.remove(task_id);
-      },
-      toggleDone: function(task_id) {
-        var task = taskStore.get(task_id);
-        task.done = !task.done;
-        taskStore.update(task);
+    function renderComponent(tasks) {
+      element.html("");
+      taskStore.all().forEach(renderTask);
+      renderInput();
+    }
+    function renderTask(task) {
+      element.append(
+        $("<div>",{
+            class: "task " + (task.done ? "done" : ""),
+            id: "task_" + task.id
+          }).append([
+            $("<input>",{
+              type: "checkbox",
+              checked: task.done
+            }),
+            task.title,
+            "&nbsp;",
+            $("<a>",{
+              href: "javascript:void(0)",
+              title: "delete Task"
+            }).append("x")
+          ])
+      );
+    }
+    function renderInput() {
+      element.append($("<input>",{
+        type: "text",
+        placeholder: "add a new task"
+      }));
+    }
+    function addTask() {
+      if (newTaskText) {
+        taskStore.add(newTaskText);
+        newTaskText = null;
+      }
+    }
+    function deleteTask(task_id) {
+      taskStore.remove(task_id);
+    }
+    function toggleDone(task_id) {
+      var task = taskStore.get(task_id);
+      task.done = !task.done;
+      taskStore.update(task);
+    }
+    function getTaskIdFromEvent(event) {
+      return Number(event.target.parentNode.id.split('_')[1]);
+    }
+    function checkKeyCode(code) {
+      return function(event) {
+        return event.keyCode == code;
+      }
+    }
+    function not(callback) {
+      return function(value) {
+        return !callback(value);
       }
     }
     // render tasks if tasks changes
-    taskStore.onValue(actions.render);
+    taskStore.onValue(renderComponent);
     // add new Task on pressing Enter key
-    keyStream.filter(function(v) { return v.keyCode == 13; }).onValue(actions.addTask);
+    keyStream.filter(checkKeyCode(13)).onValue(addTask);
     // copy value from input field to new task text on keyup event
-    var newTaskTextStream = keyStream.filter(function(v) { return v.keyCode != 13; }).map(function(v) {
+    var newTaskTextStream = keyStream.filter(not(checkKeyCode(13))).map(function(v) {
       return v.target.value;
     });
     newTaskTextStream.onValue(function(value) {
       newTaskText = value;
     });
     // click on checkbox and toggle done of task
-    getTaskIdFromEvent = function(event) {
-      return Number(event.target.parentNode.id.split('_')[1]);
-    }
     var checkboxClicks = clickStream.filter(function(v) { return v.target.type == 'checkbox';});
-    checkboxClicks.map(getTaskIdFromEvent).onValue(actions.toggleDone);
+    checkboxClicks.map(getTaskIdFromEvent).onValue(toggleDone);
     // delete task clicks
     var deleteClicks = clickStream.filter(function(v) { return v.target.tagName == 'A'});
-    deleteClicks.map(getTaskIdFromEvent).onValue(actions.deleteTask);
-    return actions;
+    deleteClicks.map(getTaskIdFromEvent).onValue(deleteTask);
   };
 
   var tasks = [
