@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+  <meta name="description" content="Simple Components Example for Streamly.js">
+  <meta charset="utf-8">
+  <title>Simple Components Example</title>
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../src/streamlyjs.js"></script>
+  <script src="helper.js"></script>
+  <style>
+    .task.done {
+      text-decoration: line-through;
+    }
+    .task a {
+      text-decoration: none;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>1st Task List Component</h1>
+  <tasklist id="task_list_one"></tasklist>
+  <h1>2nd Task List Component</h1>
+  <tasklist id="task_list_two"></tasklist>
+  <script>
+  var Streamly = window.Streamly;
+
+  function TaskListComponent(element, initial_tasks) {
+    var tasks = initial_tasks || [];
+    var newTaskText = null;
+    var tasksStream = (new Streamly.EventStream()).startWith(tasks);
+    var keyStream = element.asEventStream('keyup');
+    var clickStream = element.asEventStream('click');
+    var actions = {
+      render: function(tasks) {
+        element.html("");
+        tasks.forEach(actions.renderTask);
+        actions.renderInput();
+      },
+      renderTask: function(task) {
+        element.append(
+          $("<div>",{
+              class: "task " + (task.done ? "done" : ""),
+              id: "task_" + task.id
+            }).append([
+              $("<input>",{
+                type: "checkbox",
+                checked: task.done
+              }),
+              task.title,
+              "&nbsp;",
+              $("<a>",{
+                href: "javascript:void(0)",
+                title: "delete Task"
+              }).append("x")
+            ])
+        );
+      },
+      renderInput: function() {
+        element.append($("<input>",{
+          type: "text",
+          placeholder: "add a new task"
+        }));
+      },
+      addTask: function() {
+        if (newTaskText) {
+          tasks.push({
+            id: tasks.reduce(function(value, task) {
+              return task.id > value ? task.id : value;
+            }, 0) + 1,
+            title: newTaskText,
+            done: false
+          });
+          tasksStream.emit(tasks);
+          newTaskText = null;
+        }
+      },
+      deleteTask: function(task_id) {
+        tasks = tasks.filter(function(task) { return task.id != task_id});
+        tasksStream.emit(tasks);
+      },
+      toggleDone: function(task_id) {
+        tasks.forEach(function(task) {
+          if (task.id == task_id) task.done = !task.done;
+        });
+        tasksStream.emit(tasks);
+      }
+    }
+    // render tasks if tasks changes
+    tasksStream.onValue(actions.render);
+    // add new Task on pressing Enter key
+    keyStream.filter(function(v) { return v.keyCode == 13; }).onValue(actions.addTask);
+    // copy value from input field to new task text on keyup event
+    var newTaskTextStream = keyStream.filter(function(v) { return v.keyCode != 13; }).map(function(v) {
+      return v.target.value;
+    });
+    newTaskTextStream.onValue(function(value) {
+      newTaskText = value;
+    });
+    // click on checkbox and toggle done of task
+    getTaskIdFromEvent = function(event) {
+      return Number(event.target.parentNode.id.split('_')[1]);
+    }
+    var checkboxClicks = clickStream.filter(function(v) { return v.target.type == 'checkbox';});
+    checkboxClicks.map(getTaskIdFromEvent).onValue(actions.toggleDone);
+    // delete task clicks
+    var deleteClicks = clickStream.filter(function(v) { return v.target.tagName == 'A'});
+    deleteClicks.map(getTaskIdFromEvent).onValue(actions.deleteTask);
+    return actions;
+  };
+
+  var tasks = [
+    {id: 0, title: 'go to work', done: true},
+    {id: 1, title: 'do some work', done: false},
+  ];
+  var taskListComponent = TaskListComponent($("tasklist#task_list_one"), tasks);
+  var taskListComponent = TaskListComponent($("tasklist#task_list_two"));
+  </script>
+</body>
+</html>
