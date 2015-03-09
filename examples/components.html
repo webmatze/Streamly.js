@@ -117,6 +117,15 @@
         newTaskText = null;
       }
     }
+    function setNewTaskText(event) {
+      newTaskText = event.target.value;
+    }
+    function isCheckbox(event) {
+      return event.target.type == 'checkbox';
+    }
+    function isLink(event) {
+      return event.target.tagName == 'A';
+    }
     function deleteTask(task_id) {
       taskStore.remove(task_id);
     }
@@ -133,28 +142,16 @@
         return event.keyCode == code;
       }
     }
-    function not(callback) {
-      return function(value) {
-        return !callback(value);
-      }
-    }
     // render tasks if tasks changes
     taskStore.onValue(renderComponent);
     // add new Task on pressing Enter key
     keyStream.filter(checkKeyCode(13)).onValue(addTask);
     // copy value from input field to new task text on keyup event
-    var newTaskTextStream = keyStream.filter(not(checkKeyCode(13))).map(function(v) {
-      return v.target.value;
-    });
-    newTaskTextStream.onValue(function(value) {
-      newTaskText = value;
-    });
+    keyStream.filter(not(checkKeyCode(13))).onValue(setNewTaskText);
     // click on checkbox and toggle done of task
-    var checkboxClicks = clickStream.filter(function(v) { return v.target.type == 'checkbox';});
-    checkboxClicks.map(getTaskIdFromEvent).onValue(toggleDone);
-    // delete task clicks
-    var deleteClicks = clickStream.filter(function(v) { return v.target.tagName == 'A'});
-    deleteClicks.map(getTaskIdFromEvent).onValue(deleteTask);
+    clickStream.filter(isCheckbox).map(getTaskIdFromEvent).onValue(toggleDone);
+    // delete task if clicks on x link
+    clickStream.filter(isLink).map(getTaskIdFromEvent).onValue(deleteTask);
   };
 
   var tasks = [

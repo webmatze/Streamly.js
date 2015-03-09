@@ -16,6 +16,11 @@ var equals = function equals(value) {
     return data == value;
   };
 };
+var not = function not(callback) {
+  return function(value) {
+    return !callback(value);
+  };
+};
 var targetId = function targetId(event) {
   return event.target.id;
 };
