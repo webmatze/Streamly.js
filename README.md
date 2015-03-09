@@ -1,15 +1,45 @@
-Streamly.js
-===
+# Streamly.js
 
-### Getting Started
+A very small functional reactive programming lib for JavaScript.
 
-### How to use
+Turns your asynchronous callback-hell into declarative code heaven, by switching from imperative to functional. Instead of working with uncounted event callbacks you will work with precise and easy to follow event streams.
 
-```javascript
+Here is all you need to get started:
 
-```
+- [Homepage](http://github.com/webmatze/Streamly.js)
+- [JavaScript Source](https://github.com/webmatze/Streamly.js/blob/master/dist/streamlyjs.js)
+- [Specs](https://github.com/webmatze/Streamly.js/blob/master/test/streamlyjs.spec.js)
 
-### License
+## Examples
+
+Here you can find multiple [examples](https://github.com/webmatze/Streamly.js/tree/master/examples)
+
+## Build
+
+Check out the Streamly.js repository and run `npm install`.
+
+Then build the minified sources by running
+
+	./grunt dist
+
+The resulting JavaScript files will be generated in the `dist` directory.
+
+## Test
+
+Run all unit tests:
+
+	./grunt test
+
+## Dependencies
+
+Runtime: jQuery (optional for jQuery bindings)
+Build/test: node.js, npm, grunt
+
+## Inspiration
+
+This lib is inspired by the great functional reactive library [Bacon.js](https://github.com/baconjs/bacon.js) and [RxJS](https://github.com/Reactive-Extensions/RxJS).
+
+## License
 
 The MIT License (MIT)
 
