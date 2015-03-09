@@ -1,10 +1,10 @@
 {
   "name": "streamlyjs",
   "author": "Mathias Karstädt",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/webmatze/streamlyjs.git"
+    "url": "git://github.com/webmatze/Streamly.js"
   },
   "license": "MIT",
   "engines": {
