@@ -26,16 +26,65 @@
   <script>
   var Streamly = window.Streamly;
 
-  function TaskListComponent(element, initial_tasks) {
-    var tasks = initial_tasks || [];
+  function TaskStore(initialItems) {
+    var self = this,
+       items = initialItems || [],
+       stream = null;
+
+    self.createId = function createId() {
+      return items.reduce(function(value, task) {
+        return task.id > value ? task.id : value;
+      }, 0) + 1
+    };
+
+    self.add = function add(title) {
+      var item = {
+        id: self.createId(),
+        title: title,
+        done: false
+      }
+      items.push(item);
+      self.emit(items);
+    };
+
+    self.get = function get(id) {
+      return items.filter(function(task) {
+        return task.id == id;
+      })[0];
+    };
+
+    self.update = function update(item) {
+      items.forEach(function(task) {
+        if (item.id == task.id) {
+          task = item;
+        }
+      });
+      self.emit(items);
+    };
+
+    self.remove = function remove(id) {
+      items = items.filter(function(task) { return task.id != id});
+      self.emit(items);
+    };
+
+    self.all = function all() {
+      return items;
+    };
+
+    //make it an EventStream
+    $.extend(self, new Streamly.EventStream()).startWith(items);
+
+    return self;
+  }
+
+  function TaskListComponent(element, taskStore) {
     var newTaskText = null;
-    var tasksStream = (new Streamly.EventStream()).startWith(tasks);
     var keyStream = element.asEventStream('keyup');
     var clickStream = element.asEventStream('click');
     var actions = {
       render: function(tasks) {
         element.html("");
-        tasks.forEach(actions.renderTask);
+        taskStore.all().forEach(actions.renderTask);
         actions.renderInput();
       },
       renderTask: function(task) {
@@ -65,30 +114,21 @@
       },
       addTask: function() {
         if (newTaskText) {
-          tasks.push({
-            id: tasks.reduce(function(value, task) {
-              return task.id > value ? task.id : value;
-            }, 0) + 1,
-            title: newTaskText,
-            done: false
-          });
-          tasksStream.emit(tasks);
+          taskStore.add(newTaskText);
           newTaskText = null;
         }
       },
       deleteTask: function(task_id) {
-        tasks = tasks.filter(function(task) { return task.id != task_id});
-        tasksStream.emit(tasks);
+        taskStore.remove(task_id);
       },
       toggleDone: function(task_id) {
-        tasks.forEach(function(task) {
-          if (task.id == task_id) task.done = !task.done;
-        });
-        tasksStream.emit(tasks);
+        var task = taskStore.get(task_id);
+        task.done = !task.done;
+        taskStore.update(task);
       }
     }
     // render tasks if tasks changes
-    tasksStream.onValue(actions.render);
+    taskStore.onValue(actions.render);
     // add new Task on pressing Enter key
     keyStream.filter(function(v) { return v.keyCode == 13; }).onValue(actions.addTask);
     // copy value from input field to new task text on keyup event
@@ -114,8 +154,8 @@
     {id: 0, title: 'go to work', done: true},
     {id: 1, title: 'do some work', done: false},
   ];
-  TaskListComponent($("tasklist#task_list_one"), tasks);
-  TaskListComponent($("tasklist#task_list_two"));
+  TaskListComponent($("tasklist#task_list_one"), new TaskStore(tasks));
+  TaskListComponent($("tasklist#task_list_two"), new TaskStore());
   </script>
 </body>
 </html>
