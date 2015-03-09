@@ -1,6 +1,6 @@
 {
   "name": "streamlyjs",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Mathias Karstädt",
   "main": "dist/streamlyjs.js",
   "license": "MIT",
@@ -17,4 +17,3 @@
       ".gitignore"
   ]
 }
-
