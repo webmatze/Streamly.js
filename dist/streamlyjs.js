@@ -1,8 +1,8 @@
 /*!
-streamlyjs.js - v0.0.0
-Created by Mathias Karstädt on 2015-03-05.
+streamlyjs.js - v0.1.0
+Created by Mathias Karstädt on 2015-03-11.
 
-git://github.com/webmatze/streamlyjs.git
+git://github.com/webmatze/Streamly.js
 
 The MIT License (MIT)
 
@@ -57,7 +57,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     Streamly.EventStream = function EventStream(initialValue) {
-      this.isProperty = false;
       this.isActivated = false;
       this.value = initialValue || null;
       this.listeners = [];
@@ -79,9 +78,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     Streamly.EventStream.prototype.onValue = function onValue(callback) {
       this.listeners.push(callback);
       this.activate();
-      if (this.isProperty) {
-        callback(this.value);
-      }
       return this;
     };
 
@@ -103,7 +99,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     Streamly.EventStream.prototype.filter = function filter(filterCallback) {
       var _this = this;
       var filteredStream = new Streamly.EventStream();
-      filteredStream.isProperty = this.isProperty;
       filteredStream.onActivation(function(theStream) {
         _this.onValue(function(data) {
           if (filterCallback(data)) {
@@ -117,7 +112,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     Streamly.EventStream.prototype.map = function map(mapCallback) {
       var _this = this;
       var mappedStream = new Streamly.EventStream();
-      mappedStream.isProperty = this.isProperty;
       mappedStream.onActivation(function(theStream) {
         _this.onValue(function(data) {
           mappedStream.emit(mapCallback(data));
@@ -126,10 +120,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       return mappedStream;
     };
 
+    Streamly.EventStream.prototype.flatMap = function flatMap(callback) {
+      var _this = this;
+      var mappedStream = new Streamly.EventStream();
+      mappedStream.onActivation(function(theStream){
+        _this.onValue(function(value) {
+          callback(value).onValue(function(data) {
+            theStream.emit(data);
+          });
+        });
+      });
+      return mappedStream;
+    };
+
     Streamly.EventStream.prototype.merge = function merge(otherStream) {
       var _this = this;
       var mergedStream = new Streamly.EventStream();
-      mergedStream.isProperty = this.isProperty || otherStream.isProperty;
       mergedStream.onActivation(function(theStream) {
         _this.onValue(mergedStream.emit.bind(mergedStream));
         otherStream.onValue(mergedStream.emit.bind(mergedStream));
@@ -137,26 +143,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       return mergedStream;
     };
 
-    Streamly.EventStream.prototype.toProperty = function toProperty(initialValue) {
-      var _this = this;
-      var propertyStream = new Streamly.EventStream(initialValue);
-      propertyStream.isProperty = true;
-      propertyStream.onActivation(function(theStream) {
-        _this.onValue(propertyStream.emit.bind(propertyStream));
+    Streamly.EventStream.prototype.startWith = function startWith(initialValue) {
+      this.value = initialValue;
+      this.onActivation(function(theStream) {
+        theStream.emit(initialValue);
       });
-      propertyStream.emit(initialValue);
-      return propertyStream;
+      return this;
     };
 
     Streamly.EventStream.prototype.combine = function combine(stream, combineFunction) {
       var _this = this;
       var combinedStream = new Streamly.EventStream();
-      combinedStream.isProperty = this.isProperty || stream.isProperty;
-      this.onValue(function(value) {
-        combinedStream.emit(combineFunction(stream.value, value));
-      });
-      stream.onValue(function(value) {
-        combinedStream.emit(combineFunction(_this.value, value));
+      combinedStream.onActivation(function(theStream) {
+        _this.onValue(function(value) {
+          theStream.emit(combineFunction(stream.value, value));
+        });
+        stream.onValue(function(value) {
+          theStream.emit(combineFunction(_this.value, value));
+        });
       });
       return combinedStream;
     };
@@ -164,7 +168,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     Streamly.EventStream.prototype.scan = function scan(inital, scanFunction) {
       var _this = this;
       var scanStream = new Streamly.EventStream(inital);
-      scanStream.isProperty = this.isProperty;
       scanStream.onActivation(function(theStream) {
         _this.onValue(function(value) {
           scanStream.emit(scanFunction(scanStream.value, value));
@@ -187,6 +190,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       };
       jQuery.fn.asEventStream = Streamly.$.asEventStream;
     }
+
+    Streamly.fromPromise = function fromPromise(promise) {
+      var stream = new Streamly.EventStream();
+      var success = function(value) { stream.emit(value); };
+      var error = function(value) { stream.emit(value); };
+      stream.onActivation(function(theStream) {
+        promise.then(success, error);
+      });
+      return stream;
+    };
+
     Streamly.timed = function timed(milliseconds, callback) {
       var callLater = function() {
         callback();
@@ -209,6 +223,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Streamly.timed(milliseconds, function() {theStream.emit(value);});
       });
       return stream;
+    };
+
+    Streamly.combineWith = function combineWith(combineCallback, stream_a, stream_b) {
+      var combineWithStream = new Streamly.EventStream();
+      combineWithStream.onActivation(function(theStream) {
+        stream_a.onValue(function(value) {
+          theStream.emit(combineCallback(value, stream_b.value));
+        });
+        stream_b.onValue(function(value) {
+          theStream.emit(combineCallback(stream_a.value, value));
+        });
+      });
+      return combineWithStream;
     };
 
     return Streamly;
