@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "ulr": "git:///github.com/webmatze/Streamly.js"
+    "url": "git:///github.com/webmatze/Streamly.js"
   },
   "ignore": [
       "**/.*",
