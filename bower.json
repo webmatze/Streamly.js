@@ -1,9 +1,13 @@
 {
   "name": "streamlyjs",
-  "version": "0.1.0",
+  "description": "a very small functional reactive lib for JavaScript",
   "author": "Mathias Karstädt",
   "main": "dist/streamlyjs.js",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "ulr": "git:///github.com/webmatze/Streamly.js"
+  },
   "ignore": [
       "**/.*",
       "src",
