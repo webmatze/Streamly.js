@@ -2,7 +2,7 @@
 
 A very small functional reactive programming lib for JavaScript.
 
-Turns your asynchronous callback-hell into declarative code heaven, by switching from imperative to functional. Instead of working with uncounted event callbacks you will work with precise and easy to follow event streams.
+Turns your asynchronous callback-hell into declarative code heaven, by switching from imperative to functional. Instead of working with uncounted event callbacks you will work with precise and composable event streams.
 
 Here is all you need to get started:
 
