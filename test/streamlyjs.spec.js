@@ -29,6 +29,17 @@ describe("streamlyjs", function() {
         expect(stream.isActivated).toBe(false);
       });
 
+      describe('stream.plug', function() {
+        it('should be able to plug other streams', function() {
+          var other_stream = new Streamly.EventStream();
+          stream.plug(other_stream);
+          var values = [];
+          stream.onValue(function(value) { values.push(value); });
+          other_stream.emit(1);
+          expect(values).toEqual([1]);
+        });
+      });
+
       describe('stream.flatMap', function() {
         it("should flattedn a stream of streams", function() {
           var flatStream = Streamly.once(1).flatMap(function(value) {

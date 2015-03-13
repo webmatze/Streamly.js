@@ -68,6 +68,14 @@
       }
     };
 
+    Streamly.EventStream.prototype.plug = function plug(stream) {
+      var _this = this;
+      stream.onValue(function(value) {
+        _this.emit(value);
+      });
+      return this;
+    };
+
     Streamly.EventStream.prototype.filter = function filter(filterCallback) {
       var _this = this;
       var filteredStream = new Streamly.EventStream();
