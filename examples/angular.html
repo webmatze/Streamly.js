@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html ng-app="streamtest">
+<head>
+  <meta name="description" content="Simple Angular.js Example for Streamly.js">
+  <meta charset="utf-8">
+  <title>Simple AJAX Request Example</title>
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular.js"></script>
+  <script src="../src/streamlyjs.js"></script>
+  <script src="helper.js"></script>
+</head>
+<body>
+  <h1>Github User Recommendations</h1>
+  <div ng-controller="input">Input:<input type="text" ng-model="input" /></div>
+  <div ng-controller="output">Output:<input type="text" ng-model="output" /></div>
+  <script>
+  var Streamly = window.Streamly;
+  angular.module('streamtest', [])
+  .service("streamhelper", function() {
+    this.reverse = function(value) {
+      return value.split("").reverse().join("");
+    };
+    this.assign = function($scope, attrName) {
+      return function(value) {
+        $scope[attrName] = value;
+      };
+    };
+  })
+  .factory("stream", function() {
+    return new Streamly.EventStream();
+  })
+  .controller("input", function($scope, stream) {
+    $scope.input = "";
+    var inputStream = new Streamly.EventStream();
+    stream.plug(inputStream);
+    $scope.$watch("input", inputStream.emit.bind(stream) );
+  })
+  .controller("output", function($scope, stream, streamhelper) {
+    stream.map(streamhelper.reverse).onValue(streamhelper.assign($scope, 'output'));
+  });
+  </script>
+</body>
+</html>
+
