@@ -1,6 +1,6 @@
 /*!
 streamlyjs.js - v0.1.1
-Created by Mathias Karstädt on 2015-03-15.
+Created by Mathias Karstädt on 2015-04-03.
 
 git://github.com/webmatze/Streamly.js
 
@@ -182,6 +182,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         });
       });
       return scanStream;
+    };
+
+    Streamly.EventStream.prototype.skipDuplicates = function skipDuplicates(compareFunction) {
+      var compareValues = compareFunction || function(a, b) { return a != b; };
+      var _this = this;
+      var oldValue;
+      var skipDuplicatesStream = new Streamly.EventStream();
+      skipDuplicatesStream.onActivation(function(theStream) {
+        _this.onValue(function(value) {
+          if (compareValues(value, oldValue)) {
+            theStream.emit(value);
+          }
+          oldValue = value;
+        });
+      });
+      return skipDuplicatesStream;
     };
 
     Streamly.asEventStream = function asEventStream(element, eventName) {
