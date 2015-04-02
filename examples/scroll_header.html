@@ -61,13 +61,9 @@
     return window.scrollY;
   });
 
-  var smallHeaderStream = scrollStream.filter(function(value) {
-    return value > 0;
-  }).map(always(1));
+  var smallHeaderStream = scrollStream.filter(not(equals(0))).map(always(1));
 
-  var largeHeaderStream = scrollStream.filter(function(value) {
-    return value == 0;
-  }).map(always(0)).startWith(0);
+  var largeHeaderStream = scrollStream.filter(equals(0)).map(always(0)).startWith(0);
 
   var headerStream = smallHeaderStream.merge(largeHeaderStream);
 
