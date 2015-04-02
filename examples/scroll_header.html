@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+  <meta name="description" content="Scroll Header example for streamly.js">
+  <meta charset="utf-8">
+  <title>Scroll Header Example</title>
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../src/streamlyjs.js"></script>
+  <script src="helper.js"></script>
+  <style>
+    body {
+      margin: 0;
+    }
+    header {
+      background-color: lightblue;
+      padding: 10px;
+      position: fixed;
+      display: block;
+      width: 100%;
+    }
+    header .small {
+      font-weight: bold;
+    }
+    header .large {
+      font-weight: bold;
+      font-size: 24px;
+    }
+    section {
+      padding: 10px;
+    }
+    section p {
+      padding-top: 300px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="small">The small header</div>
+    <div class="large">The large header</div>
+  </header>
+  <section>
+    <p>Please scroll me...</p>
+    <p>... this example uses map, ...</p>
+    <p>... filter and ...</p>
+    <p>... skipDuplicates to change the ...</p>
+    <p>... header content ...</p>
+    <p>Please scroll me...</p>
+    <p>Please scroll me...</p>
+    <p>Please scroll me...</p>
+    <p>Please scroll me...</p>
+    <p>Please scroll me...</p>
+    <p>Please scroll me...</p>
+    <p>Please scroll me...</p>
+    <p>Please scroll me...</p>
+  </section>
+  <script>
+  var Streamly = window.Streamly;
+
+  var scrollStream = $(window).asEventStream('scroll').map(function() {
+    return window.scrollY;
+  });
+
+  var smallHeaderStream = scrollStream.filter(function(value) {
+    return value > 0;
+  }).map(always(1));
+
+  var largeHeaderStream = scrollStream.filter(function(value) {
+    return value == 0;
+  }).map(always(0)).startWith(0);
+
+  var headerStream = smallHeaderStream.merge(largeHeaderStream);
+
+  var smallHeader = document.querySelector("header .small");
+  var largeHeader = document.querySelector("header .large");
+  headerStream.skipDuplicates().onValue(function(value) {
+    console.log(value);
+    if (value) {
+      largeHeader.style.display = 'none';
+      smallHeader.style.display = 'block';
+    } else {
+      largeHeader.style.display = 'block';
+      smallHeader.style.display = 'none';
+    }
+  });
+
+  </script>
+</body>
+</html>
+

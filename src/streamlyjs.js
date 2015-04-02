@@ -156,6 +156,22 @@
       return scanStream;
     };
 
+    Streamly.EventStream.prototype.skipDuplicates = function skipDuplicates(compareFunction) {
+      var compareValues = compareFunction || function(a, b) { return a != b; };
+      var _this = this;
+      var oldValue;
+      var skipDuplicatesStream = new Streamly.EventStream();
+      skipDuplicatesStream.onActivation(function(theStream) {
+        _this.onValue(function(value) {
+          if (compareValues(value, oldValue)) {
+            theStream.emit(value);
+          }
+          oldValue = value;
+        });
+      });
+      return skipDuplicatesStream;
+    };
+
     Streamly.asEventStream = function asEventStream(element, eventName) {
       var stream = new Streamly.EventStream();
       stream.onActivation(function(theStream) {
